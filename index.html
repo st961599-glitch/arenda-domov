@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Аренда Домов - Тарифы</title>
     <link rel="stylesheet" href="style.css">
-    
-    <!-- Надежное подключение Firebase через стабильное зеркало cdnjs -->
-    <script src="https://cloudflare.com"></script>
-    <script src="https://cloudflare.com"></script>
 </head>
 <body>
 
@@ -24,54 +20,53 @@
     </main>
 
     <script>
-        // Ваши точные настройки проекта
-        const firebaseConfig = {
-            apiKey: "AIzaSyDm3XvtldDnpLDH29uV8e0Z2Zwj9BVNqA",
-            authDomain: "://firebaseapp.com",
-            projectId: "arenda-domov-e2e15",
-            storageBucket: "://appspot.com",
-            messagingSenderId: "297684238985",
-            appId: "1:297684238985:web:277fd972cdc8465ab5fc58",
-            measurementId: "G-6G2984FBD1"
-        };
-
-        // Запуск Firebase
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        const db = firebase.firestore();
+        // Используем прямой доступ к вашей базе данных через интернет-адрес
+        const projectId = "arenda-domov-e2e15";
+        const url = `https://googleapis.com{projectId}/databases/(default)/documents/Договор`;
 
         async function loadTariffs() {
             const grid = document.getElementById('tariffs-grid');
             try {
-                // Берем данные из вашей коллекции "Договор"
-                const querySnapshot = await db.collection("Договор").get();
-                grid.innerHTML = ""; 
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Ошибка сети или доступа Firestore Rules');
+                
+                const result = await response.json();
+                grid.innerHTML = ""; // Очищаем текст загрузки
 
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    
-                    const price = data.Цена || data.цена;
-                    const duration = data.Продление || data.продление || data.Пrodlenie;
+                if (!result.documents || result.documents.length === 0) {
+                    grid.innerHTML = "<p>В коллекции 'Договор' нет документов.</p>";
+                    return;
+                }
 
-                    if (price && duration) {
+                result.documents.forEach((doc) => {
+                    const fields = doc.fields;
+                    if (!fields) return;
+
+                    // Достаем ID документа из его полного пути (например, "1месяц")
+                    const docId = doc.name.split('/').pop();
+
+                    // Достаем значения полей из структуры Firestore REST API
+                    const priceField = fields.Цена || fields.цена;
+                    const durationField = fields.Продление || fields.продление || fields.Пrodlenie;
+
+                    if (priceField && durationField) {
+                        const price = priceField.integerValue || priceField.stringValue || priceField.doubleValue;
+                        const duration = durationField.stringValue;
+
                         const card = document.createElement('div');
                         card.className = 'card';
                         card.innerHTML = `
                             <h2>${duration}</h2>
                             <p class="price">${Number(price).toLocaleString('ru-RU')} ₽</p>
-                            <button onclick="chooseTariff('${doc.id}', '${price}')">Выбрать</button>
+                            <button onclick="chooseTariff('${docId}', '${price}')">Выбрать</button>
                         `;
                         grid.appendChild(card);
                     }
                 });
 
-                if (grid.children.length === 0) {
-                    grid.innerHTML = "<p>Документы в базе найдены, но проверьте имена полей внутри Firebase.</p>";
-                }
             } catch (error) {
-                console.error("Ошибка Firebase:", error);
-                grid.innerHTML = "<p>Ошибка доступа. Пожалуйста, откройте вкладку Rules в Firestore и включите allow read.</p>";
+                console.error("Ошибка:", error);
+                grid.innerHTML = "<p>Не удалось загрузить данные. Проверьте вкладку Rules в Firestore.</p>";
             }
         }
 
@@ -85,4 +80,3 @@
     </script>
 </body>
 </html>
-
