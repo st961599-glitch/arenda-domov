@@ -1,0 +1,92 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оформление договора</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <main class="container form-container">
+        <a href="index.html" class="back-link">← Назад к тарифам</a>
+        
+        <h2>Оформление заявки</h2>
+        <div id="tariff-summary" class="summary-box"></div>
+
+        <form id="order-form">
+            <div class="form-group">
+                <label for="client-name">Ваше имя</label>
+                <input type="text" id="client-name" required placeholder="Иван Иванов">
+            </div>
+            
+            <div class="form-group">
+                <label for="client-phone">Номер телефона</label>
+                <input type="tel" id="client-phone" required placeholder="+7 (999) 000-00-00">
+            </div>
+
+            <button type="submit" class="submit-btn">Подтвердить заказ</button>
+        </form>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://gstatic.com";
+        import { getFirestore, collection, addDoc } from "https://gstatic.com";
+
+        // ТОЧНО ТАКИЕ ЖЕ НАСТРОЙКИ FIREBASE, КАК В ПЕРВОМ ФАЙЛЕ
+        const firebaseConfig = {
+            apiKey: "ВАШ_API_KEY",
+            authDomain: "://firebaseapp.com",
+            projectId: "arenda-domov-e2a15",
+            storageBucket: "://appspot.com",
+            messagingSenderId: "ВАШ_SENDER_ID",
+            appId: "ВАШ_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Получаем данные о выбранном тарифе из памяти браузера
+        const tariffId = localStorage.getItem('selectedTariffId');
+        const tariffPrice = localStorage.getItem('selectedTariffPrice');
+
+        if (!tariffId) {
+            window.location.href = 'index.html';
+        }
+
+        // Выводим информацию о тарифе сверху формы
+        document.getElementById('tariff-summary').innerHTML = `
+            <p><strong>Выбранный период:</strong> ${tariffId}</p>
+            <p><strong>Стоимость:</strong> ${Number(tariffPrice).toLocaleString('ru-RU')} ₽</p>
+        `;
+
+        // Обработка отправки формы
+        document.getElementById('order-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('client-name').value;
+            const phone = document.getElementById('client-phone').value;
+
+            try {
+                // Сохраняем клиента в коллекцию "Данные клиента"
+                await addDoc(collection(db, "Данные клиента"), {
+                    имя: name,
+                    телефон: phone,
+                    тариф: tariffId,
+                    цена: Number(tariffPrice),
+                    датаЗаявки: new Date().toISOString()
+                });
+
+                alert('Спасибо! Заявка успешно отправлена. Данные сохранены в Firebase.');
+                localStorage.clear();
+                window.location.href = 'index.html';
+                
+            } catch (error) {
+                console.error("Ошибка отправки:", error);
+                alert('Произошла ошибка при отправке данных. Проверьте правила доступа в Rules.');
+            }
+        });
+    </script>
+</body>
+</html>

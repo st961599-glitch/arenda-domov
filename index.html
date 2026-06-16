@@ -1,0 +1,83 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аренда Домов - Тарифы</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Arenda domov</h1>
+        <p>Выберите подходящий тариф для аренды дома</p>
+    </header>
+
+    <main class="container">
+        <!-- Сюда JavaScript сам добавит карточки из Firebase -->
+        <div id="tariffs-grid" class="grid">
+            <p class="loading">Загрузка тарифов...</p>
+        </div>
+    </main>
+
+    <!-- Подключаем Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://gstatic.com";
+        import { getFirestore, collection, getDocs } from "https://gstatic.com";
+
+        // ВСТАВЬТЕ СЮДА НАСТРОЙКИ СВОЕГО ПРОЕКТА FIREBASE!
+        // Их можно взять в настройках проекта в консоли Firebase (иконка шестеренки -> Project settings)
+        const firebaseConfig = {
+            apiKey: "ВАШ_API_KEY",
+            authDomain: "://firebaseapp.com",
+            projectId: "arenda-domov-e2a15",
+            storageBucket: "://appspot.com",
+            messagingSenderId: "ВАШ_SENDER_ID",
+            appId: "ВАШ_APP_ID"
+        };
+
+        // Инициализация
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Функция загрузки тарифов
+        async function loadTariffs() {
+            const grid = document.getElementById('tariffs-grid');
+            try {
+                // Читаем коллекцию "Договор" из вашего скриншота
+                const querySnapshot = await getDocs(collection(db, "Договор"));
+                grid.innerHTML = ""; // Очищаем текст загрузки
+
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    
+                    // Проверяем, что это документ с тарифом, а не подколлекция
+                    if (data.Цена && data.Продление) {
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.innerHTML = `
+                            <h2>${data.Пrodlenie || data.Продление}</h2>
+                            <p class="price">${Number(data.Цена).toLocaleString('ru-RU')} ₽</p>
+                            <button onclick="chooseTariff('${doc.id}', '${data.Цена}')">Выбрать</button>
+                        `;
+                        grid.appendChild(card);
+                    }
+                });
+            } catch (error) {
+                console.error("Ошибка загрузки:", error);
+                grid.innerHTML = "<p>Не удалось загрузить тарифы. Проверьте настройки Firebase и правила Rules.</p>";
+            }
+        }
+
+        // Клик по кнопке: сохраняем выбор и переходим на страницу заказа
+        window.chooseTariff = function(id, price) {
+            localStorage.setItem('selectedTariffId', id);
+            localStorage.setItem('selectedTariffPrice', price);
+            window.location.href = 'order.html';
+        }
+
+        loadTariffs();
+    </script>
+</body>
+</html>
