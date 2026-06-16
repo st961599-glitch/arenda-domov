@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Аренда Домов - Тарифы</title>
+    <title>Arenda Domov</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -20,20 +20,22 @@
     </main>
 
     <script>
-        // Используем прямой доступ к вашей базе данных через интернет-адрес
-       const projectId = "arenda-domov-e2e15";
+        // Чистая ссылка без единой ошибки
         const url = "https://googleapis.com";
+
         async function loadTariffs() {
             const grid = document.getElementById('tariffs-grid');
             try {
                 const response = await fetch(url);
-                if (!response.ok) throw new Error('Ошибка сети или доступа Firestore Rules');
+                if (!response.ok) {
+                    throw new Error('Ошибка доступа');
+                }
                 
                 const result = await response.json();
-                grid.innerHTML = ""; // Очищаем текст загрузки
+                grid.innerHTML = ""; 
 
-                if (!result.documents || result.documents.length === 0) {
-                    grid.innerHTML = "<p>В коллекции 'Договор' нет документов.</p>";
+                if (!result.documents) {
+                    grid.innerHTML = "<p>Тарифы не найдены в базе данных.</p>";
                     return;
                 }
 
@@ -41,15 +43,14 @@
                     const fields = doc.fields;
                     if (!fields) return;
 
-                    // Достаем ID документа из его полного пути (например, "1месяц")
                     const docId = doc.name.split('/').pop();
 
-                    // Достаем значения полей из структуры Firestore REST API
+                    // Ищем поля Цена и Продление в любом регистре
                     const priceField = fields.Цена || fields.цена;
                     const durationField = fields.Продление || fields.продление || fields.Пrodlenie;
 
                     if (priceField && durationField) {
-                        const price = priceField.integerValue || priceField.stringValue || priceField.doubleValue;
+                        const price = priceField.integerValue || priceField.stringValue;
                         const duration = durationField.stringValue;
 
                         const card = document.createElement('div');
@@ -79,3 +80,4 @@
     </script>
 </body>
 </html>
+
