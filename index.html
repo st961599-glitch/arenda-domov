@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Аренда Домов - Тарифы</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Подключаем Firebase через надежный глобальный скрипт -->
+    <script src="https://gstatic.com"></script>
+    <script src="https://gstatic.com"></script>
 </head>
 <body>
 
@@ -19,12 +22,8 @@
         </div>
     </main>
 
-    <script type="module">
-       import { initializeApp } from "./firebase-app.js";
-import { getFirestore, collection, getDocs } from "./firebase-firestore.js";
-
-
-        // Ваши точные настройки из скриншота
+    <script>
+        // Настройки вашего проекта Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDm3XvtldDnpLDH29uV8e0Z2Zwj9BVNqA",
             authDomain: "arenda ://firebaseapp.com",
@@ -35,19 +34,21 @@ import { getFirestore, collection, getDocs } from "./firebase-firestore.js";
             measurementId: "G-6G2984FBD1"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        // Инициализация базы данных
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
         async function loadTariffs() {
             const grid = document.getElementById('tariffs-grid');
             try {
-                const querySnapshot = await getDocs(collection(db, "Договор"));
+                // Читаем коллекцию "Договор" из Firebase
+                const querySnapshot = await db.collection("Договор").get();
                 grid.innerHTML = ""; 
 
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
                     
-                    // Умный поиск полей (неважно, большая буква или маленькая)
+                    // Поиск полей (неважно, большая буква или маленькая)
                     const price = data.Цена || data.цена;
                     const duration = data.Продление || data.продление || data.Пrodlenie;
 
@@ -64,20 +65,22 @@ import { getFirestore, collection, getDocs } from "./firebase-firestore.js";
                 });
 
                 if (grid.children.length === 0) {
-                    grid.innerHTML = "<p>Тарифы найдены, но у них не совпадают имена полей 'Цена' или 'Продление'.</p>";
+                    grid.innerHTML = "<p>Тарифы в базе данных найдены, но проверьте имена полей ('Цена' и 'Продление').</p>";
                 }
             } catch (error) {
                 console.error("Ошибка Firebase:", error);
-                grid.innerHTML = "<p>Ошибка доступа. Пожалуйста, проверьте вкладку Rules в Firestore.</p>";
+                grid.innerHTML = "<p>Ошибка доступа. Проверьте, что в Firebase на вкладке Rules включен доступ 'if true'.</p>";
             }
         }
 
+        // Функция клика по кнопке
         window.chooseTariff = function(id, price) {
             localStorage.setItem('selectedTariffId', id);
             localStorage.setItem('selectedTariffPrice', price);
             window.location.href = 'order.html';
         }
 
+        // Запуск при загрузке страницы
         loadTariffs();
     </script>
 </body>
