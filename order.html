@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -34,21 +33,20 @@
         import { initializeApp } from "https://gstatic.com";
         import { getFirestore, collection, addDoc } from "https://gstatic.com";
 
-        // ТОЧНО ТАКИЕ ЖЕ НАСТРОЙКИ FIREBASE, КАК В ПЕРВОМ ФАЙЛЕ
+        // Ваши точные настройки из скриншота
         const firebaseConfig = {
-  apiKey: "AIzaSyDm3XvtldDnpLDH29uV8e0722nWj08vNqA",
-  authDomain: "arenda-domov-e2e15.firebaseapp.com",
-  projectId: "arenda-domov-e2e15",
-  storageBucket: "arenda-domov-e2e15.firebasestorage.app",
-  messagingSenderId: "297684238985",
-  appId: "1:297684238985:web:727fd972cdc8465a55fc58",
-  measurementId: "G-6GZ904F8D1"
-};
+            apiKey: "AIzaSyDm3XvtldDnpLDH29uV8e0Z2Zwj9BVNqA",
+            authDomain: "arenda ://firebaseapp.com",
+            projectId: "arenda domov-e2e15",
+            storageBucket: "arenda domov-e2e15.firebasestorage.app",
+            messagingSenderId: "297684238985",
+            appId: "1:297684238985:web:277fd972cdc8465ab5fc58",
+            measurementId: "G-6G2984FBD1"
+        };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Получаем данные о выбранном тарифе из памяти браузера
         const tariffId = localStorage.getItem('selectedTariffId');
         const tariffPrice = localStorage.getItem('selectedTariffPrice');
 
@@ -56,13 +54,11 @@
             window.location.href = 'index.html';
         }
 
-        // Выводим информацию о тарифе сверху формы
         document.getElementById('tariff-summary').innerHTML = `
             <p><strong>Выбранный период:</strong> ${tariffId}</p>
             <p><strong>Стоимость:</strong> ${Number(tariffPrice).toLocaleString('ru-RU')} ₽</p>
         `;
 
-        // Обработка отправки формы
         document.getElementById('order-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -70,7 +66,7 @@
             const phone = document.getElementById('client-phone').value;
 
             try {
-                // Сохраняем клиента в коллекцию "Данные клиента"
+                // Сохраняем заявку в "Данные клиента"
                 await addDoc(collection(db, "Данные клиента"), {
                     имя: name,
                     телефон: phone,
@@ -79,13 +75,13 @@
                     датаЗаявки: new Date().toISOString()
                 });
 
-                alert('Спасибо! Заявка успешно отправлена. Данные сохранены в Firebase.');
+                alert('Спасибо! Заявка успешно отправлена.');
                 localStorage.clear();
                 window.location.href = 'index.html';
                 
             } catch (error) {
                 console.error("Ошибка отправки:", error);
-                alert('Произошла ошибка при отправке данных. Проверьте правила доступа в Rules.');
+                alert('Ошибка отправки. Проверьте вкладку Rules в Firestore.');
             }
         });
     </script>
