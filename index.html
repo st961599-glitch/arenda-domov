@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arenda Domov</title>
+    <title>Аренда Домов - Тарифы</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -14,69 +14,45 @@
     </header>
 
     <main class="container">
-        <div id="tariffs-grid" class="grid">
-            <p class="loading">Загрузка тарифов...</p>
+        <div class="grid">
+            
+            <!-- Карточка 1 -->
+            <div class="card">
+                <h2>На 1 месяц</h2>
+                <p class="price">60 000 ₽</p>
+                <button onclick="chooseTariff('1месяц', '60000')">Выбрать</button>
+            </div>
+
+            <!-- Карточка 2 -->
+            <div class="card">
+                <h2>На 3 месяца</h2>
+                <p class="price">150 000 ₽</p>
+                <button onclick="chooseTariff('3месяца', '150000')">Выбрать</button>
+            </div>
+
+            <!-- Карточка 3 -->
+            <div class="card">
+                <h2>На 6 месяцев</h2>
+                <p class="price">280 000 ₽</p>
+                <button onclick="chooseTariff('6месяцев', '280000')">Выбрать</button>
+            </div>
+
+            <!-- Карточка 4 -->
+            <div class="card">
+                <h2>На 1 год</h2>
+                <p class="price">540 000 ₽</p>
+                <button onclick="chooseTariff('1год', '540000')">Выбрать</button>
+            </div>
+
         </div>
     </main>
 
     <script>
-        // Чистая ссылка без единой ошибки
-        const url = "https://googleapis.com";
-
-        async function loadTariffs() {
-            const grid = document.getElementById('tariffs-grid');
-            try {
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error('Ошибка доступа');
-                }
-                
-                const result = await response.json();
-                grid.innerHTML = ""; 
-
-                if (!result.documents) {
-                    grid.innerHTML = "<p>Тарифы не найдены в базе данных.</p>";
-                    return;
-                }
-
-                result.documents.forEach((doc) => {
-                    const fields = doc.fields;
-                    if (!fields) return;
-
-                    const docId = doc.name.split('/').pop();
-
-                    // Ищем поля Цена и Продление в любом регистре
-                    const priceField = fields.Цена || fields.цена;
-                    const durationField = fields.Продление || fields.продление || fields.Пrodlenie;
-
-                    if (priceField && durationField) {
-                        const price = priceField.integerValue || priceField.stringValue;
-                        const duration = durationField.stringValue;
-
-                        const card = document.createElement('div');
-                        card.className = 'card';
-                        card.innerHTML = `
-                            <h2>${duration}</h2>
-                            <p class="price">${Number(price).toLocaleString('ru-RU')} ₽</p>
-                            <button onclick="chooseTariff('${docId}', '${price}')">Выбрать</button>
-                        `;
-                        grid.appendChild(card);
-                    }
-                });
-
-            } catch (error) {
-                console.error("Ошибка:", error);
-                grid.innerHTML = "<p>Не удалось загрузить данные. Проверьте вкладку Rules в Firestore.</p>";
-            }
-        }
-
         window.chooseTariff = function(id, price) {
             localStorage.setItem('selectedTariffId', id);
             localStorage.setItem('selectedTariffPrice', price);
             window.location.href = 'order.html';
         }
-
-        loadTariffs();
     </script>
 </body>
 </html>
