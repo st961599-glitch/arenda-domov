@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Оформление договора</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Подключаем Firebase через надежный глобальный скрипт -->
+    <script src="https://gstatic.com"></script>
+    <script src="https://gstatic.com"></script>
 </head>
 <body>
 
@@ -29,12 +32,8 @@
         </form>
     </main>
 
-    <script type="module">
-        import { initializeApp } from "./firebase-app.js";
-import { getFirestore, collection, addDoc } from "./firebase-firestore.js";
-
-
-        // Ваши точные настройки из скриншота
+    <script>
+        // Настройки вашего проекта Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDm3XvtldDnpLDH29uV8e0Z2Zwj9BVNqA",
             authDomain: "arenda ://firebaseapp.com",
@@ -45,8 +44,9 @@ import { getFirestore, collection, addDoc } from "./firebase-firestore.js";
             measurementId: "G-6G2984FBD1"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        // Инициализация базы данных
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
         const tariffId = localStorage.getItem('selectedTariffId');
         const tariffPrice = localStorage.getItem('selectedTariffPrice');
@@ -55,11 +55,13 @@ import { getFirestore, collection, addDoc } from "./firebase-firestore.js";
             window.location.href = 'index.html';
         }
 
+        // Выводим выбранный тариф на экран
         document.getElementById('tariff-summary').innerHTML = `
             <p><strong>Выбранный период:</strong> ${tariffId}</p>
             <p><strong>Стоимость:</strong> ${Number(tariffPrice).toLocaleString('ru-RU')} ₽</p>
         `;
 
+        // Отправка формы в базу данных клиентов
         document.getElementById('order-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -67,8 +69,8 @@ import { getFirestore, collection, addDoc } from "./firebase-firestore.js";
             const phone = document.getElementById('client-phone').value;
 
             try {
-                // Сохраняем заявку в "Данные клиента"
-                await addDoc(collection(db, "Данные клиента"), {
+                // Добавляем документ в коллекцию "Данные клиента"
+                await db.collection("Данные клиента").add({
                     имя: name,
                     телефон: phone,
                     тариф: tariffId,
@@ -82,9 +84,10 @@ import { getFirestore, collection, addDoc } from "./firebase-firestore.js";
                 
             } catch (error) {
                 console.error("Ошибка отправки:", error);
-                alert('Ошибка отправки. Проверьте вкладку Rules в Firestore.');
+                alert('Ошибка отправки. Проверьте правила доступа Rules в Firebase.');
             }
         });
     </script>
 </body>
 </html>
+
