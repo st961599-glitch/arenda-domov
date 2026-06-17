@@ -33,3 +33,9 @@ function login() {
 function logout() {
     auth.signOut();
 }
+ function showLogin() {
+    showPage('loginPage');
+}
+function showRegister() {
+    showPage('registerPage');
+}
