@@ -7,40 +7,26 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-// Регистрация
-function register() {
-    const email = document.getElementById('registerEmail').value;
-    const password = document.getElementById('registerPassword').value;
-    const name = document.getElementById('registerName').value;
-    auth.createUserWithEmailAndPassword(email, password)
-        .then(credential => {
-            return credential.user.updateProfile({ displayName: name });
-        })
-        .then(() => {
-            alert('Регистрация прошла успешно!');
-            showPage('catalogPage');
-            loadProducts();
-        })
-        .catch(error => alert('Ошибка: ' + error.message));
-}
+<!-- Страницы -->
+<div id="loginPage" class="page">
+    <div class="form">
+        <h2>Войти</h2>
+        <input type="email" id="loginEmail" placeholder="Email" />
+        <input type="password" id="loginPassword" placeholder="Пароль" />
+        <button onclick="login()">Войти</button>
+        <p>или <a href="#" onclick="showRegister()">Регистрация</a></p>
+    </div>
 
-// Вход
-function login() {
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-    auth.signInWithEmailAndPassword(email, password)
-        .then(() => {
-            alert('Добро пожаловать!');
-            showPage('catalogPage');
-            loadProducts();
-        })
-        .catch(error => alert('Ошибка: ' + error.message));
-}
+</div>
 
-// Выйти
-function logout() {
-    auth.signOut();
-}
+<div id="registerPage" class="page" style="display:none;">
+    <h2>Регистрация</h2>
+    <input type="text" id="registerName" placeholder="Имя" />
+    <input type="email" id="registerEmail" placeholder="Email" />
+    <input type="password" id="registerPassword" placeholder="Пароль" />
+    <button onclick="register()">Зарегистрироваться</button>
+    <p>или <a href="#" onclick="showLogin()">Войти</a></p>
+</div>
     <header>
         <h1>Arenda domov</h1>
         <p>Выберите подходящий тариф для аренды дома</p>
