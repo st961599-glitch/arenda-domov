@@ -1,5 +1,3 @@
-export * from "https://gstatic.com";
-
 const firebaseConfig = {
   apiKey: "AIzaSyDm3XvtldDnpLDH29uV8e0722nWj08vNqA",
   authDomain: "arenda-domov-e2e15.firebaseapp.com",
