@@ -15,9 +15,24 @@ const firebaseConfig = {
 
 // Регистрация
 function register() {
-    const email = document.getElementById('registerEmail').value;
-    const password = document.getElementById('registerPassword').value;
-    const name = document.getElementById('registerName').value;
+    const emailInput = document.getElementById('registerEmail');
+    const passwordInput = document.getElementById('registerPassword');
+    const nameInput = document.getElementById('registerName');
+
+    if (!emailInput || !passwordInput || !nameInput) {
+        alert('Ошибка: Не удалось найти поля ввода на странице!');
+        return;
+    }
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+    const name = nameInput.value.trim();
+
+    if (!email || !password || !name) {
+        alert('Пожалуйста, заполните все поля для регистрации!');
+        return;
+    }
+
     auth.createUserWithEmailAndPassword(email, password)
         .then(credential => {
             return credential.user.updateProfile({ displayName: name });
@@ -25,22 +40,38 @@ function register() {
         .then(() => {
             alert('Регистрация прошла успешно!');
             showPage('catalogPage');
+            switchTab('productsTab');
             loadProducts();
         })
-        .catch(error => alert('Ошибка: ' + error.message));
+        .catch(error => alert('Ошибка регистрации: ' + error.message));
 }
 
 // Вход
 function login() {
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
+    const emailInput = document.getElementById('loginEmail');
+    const passwordInput = document.getElementById('loginPassword');
+
+    if (!emailInput || !passwordInput) {
+        alert('Ошибка: Не удалось найти поля ввода для входа!');
+        return;
+    }
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    if (!email || !password) {
+        alert('Пожалуйста, введите Email и Пароль!');
+        return;
+    }
+
     auth.signInWithEmailAndPassword(email, password)
         .then(() => {
             alert('Добро пожаловать!');
             showPage('catalogPage');
+            switchTab('productsTab');
             loadProducts();
         })
-        .catch(error => alert('Ошибка: ' + error.message));
+        .catch(error => alert('Ошибка входа: ' + error.message));
 }
 
 // Выйти
