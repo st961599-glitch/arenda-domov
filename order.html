@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Оформление договора</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Подключаем Firebase через зеркало cdnjs, оно точно сработает! -->
-    <script src="https://cloudflare.com"></script>
-    <script src="https://cloudflare.com"></script>
 </head>
 <body>
 
@@ -16,6 +13,11 @@
         
         <h2>Оформление заявки</h2>
         <div id="tariff-summary" class="summary-box"></div>
+
+        <!-- Сюда будем выводить предупреждение, если пользователь не вошел -->
+        <p id="auth-warning" style="color: red; display: none; font-weight: bold; margin-bottom: 15px;">
+            ⚠️ Чтобы оформить заказ, пожалуйста, сначала войдите в свой аккаунт на главной странице!
+        </p>
 
         <form id="order-form">
             <div class="form-group">
@@ -28,17 +30,37 @@
                 <input type="tel" id="client-phone" required placeholder="+7 (999) 000-00-00">
             </div>
 
-            <button type="submit" class="submit-btn">Подтвердить заказ</button>
+            <button type="submit" id="submit-btn" class="submit-btn">Подтвердить заказ</button>
         </form>
     </main>
 
-        // Инициализация базы данных
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+    <!-- Подключаем Firebase v9+ через модули скриптов -->
+    <script type="module">
+        import { initializeApp } from "https://gstatic.com";
+        import { getAuth, onAuthStateChanged } from "https://gstatic.com";
+        import { getFirestore, collection, addDoc } from "https://gstatic.com";
 
+        // Ваша конфигурация Firebase (точно такая же, как в app.js)
+        const firebaseConfig = {
+          apiKey: "AIzaSyDm3XvtldDnpLDH29uV8e0722nWj08vNqA",
+          authDomain: "://firebaseapp.com",
+          projectId: "arenda-domov-e2e15",
+          storageBucket: "arenda-domov-e2e15.firebasestorage.app",
+          messagingSenderId: "297684238985",
+          appId: "1:297684238985:web:727fd972cdc8465a55fc58",
+          measurementId: "G-6GZ904F8D1"
+        };
+
+        // Инициализируем сервисы
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Получаем выбранный тариф из хранилища
         const tariffId = localStorage.getItem('selectedTariffId');
         const tariffPrice = localStorage.getItem('selectedTariffPrice');
 
+        // Если тариф вообще не выбран, уводим обратно
         if (!tariffId) {
             window.location.href = 'index.html';
         }
@@ -49,33 +71,65 @@
             <p><strong>Стоимость:</strong> ${Number(tariffPrice).toLocaleString('ru-RU')} ₽</p>
         `;
 
-        // Отправка формы в базу данных клиентов
+        // Переменная для хранения ID залогиненного пользователя
+        let currentUser = null;
+
+        // Следим за тем, залогинен ли клиент
+        onAuthStateChanged(auth, (user) => {
+            const warningText = document.getElementById('auth-warning');
+            const submitBtn = document.getElementById('submit-btn');
+
+            if (user) {
+                currentUser = user; // Запоминаем пользователя
+                warningText.style.display = 'none';
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+            } else {
+                currentUser = null;
+                warningText.style.display = 'block'; // Показываем ошибку
+                submitBtn.disabled = true; // Выключаем кнопку отправки
+                submitBtn.style.opacity = '0.5';
+            }
+        });
+
+        // Отправка формы в Firestore
         document.getElementById('order-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            // Дополнительная проверка на случай, если кнопку обошли
+            if (!currentUser) {
+                alert('Ошибка: Оформлять заказы могут только авторизованные пользователи!');
+                return;
+            }
+
             const name = document.getElementById('client-name').value;
             const phone = document.getElementById('client-phone').value;
 
             try {
-                // Добавляем документ в коллекцию "Данные клиента"
-                await db.collection("Данные клиента").add({
+                // Новая безопасная отправка v9 в Firestore
+                await addDoc(collection(db, "Данные клиента"), {
                     имя: name,
                     телефон: phone,
                     тариф: tariffId,
                     цена: Number(tariffPrice),
+                    userEmail: currentUser.email, // Привязываем email покупателя к заказу
+                    userId: currentUser.uid,      // Привязываем уникальный ID к заказу
                     датаЗаявки: new Date().toISOString()
                 });
 
                 alert('Спасибо! Заявка успешно отправлена.');
-                localStorage.clear();
+                
+                // Очищаем только данные тарифа, чтобы не разлогинить пользователя
+                localStorage.removeItem('selectedTariffId');
+                localStorage.removeItem('selectedTariffPrice');
+                
                 window.location.href = 'index.html';
                 
             } catch (error) {
                 console.error("Ошибка отправки:", error);
-                alert('Ошибка отправки. Проверьте правила доступа Rules в Firebase.');
+                alert('Ошибка отправки. Убедитесь, что в панели Firebase Firestore включена база данных Cloud Firestore.');
             }
         });
-       
     </script>
 </body>
 </html>
