@@ -7,18 +7,25 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<!-- Страницы -->
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+<!-- Страницы авторизации -->
 <div id="loginPage" class="page">
     <div class="form">
-        <h2>Войти</h2>
+        <h2>Войти в ПроФитнес</h2>
         <input type="email" id="loginEmail" placeholder="Email" />
         <input type="password" id="loginPassword" placeholder="Пароль" />
         <button onclick="login()">Войти</button>
         <p>или <a href="#" onclick="showRegister()">Регистрация</a></p>
     </div>
+</div>
 
 <div id="registerPage" class="page" style="display:none;">
-    <h2>Регистрация в Arenda domov </h2>
+    <h2>Регистрация в ПроФитнес</h2>
     <input type="text" id="registerName" placeholder="Имя" />
     <input type="email" id="registerEmail" placeholder="Email" />
     <input type="password" id="registerPassword" placeholder="Пароль" />
