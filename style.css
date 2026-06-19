@@ -5,114 +5,43 @@ body {
     margin: 0;
     padding: 0;
 }
-
 header {
     text-align: center;
     padding: 40px 20px;
     background-color: #ffffff;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    position: relative; /* Нужно для позиционирования кнопок */
 }
-
 header h1 {
     margin: 0;
     color: #ff9100;
 }
-
-/* НАЧАЛО: Новые стили для кнопок авторизации в шапке */
-.auth-nav {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.auth-nav button {
-    width: auto;
-    padding: 6px 14px;
-    font-size: 0.9rem;
-    background-color: #fff;
-    color: #ff9100;
-    border: 2px solid #ff9100;
-}
-
-.auth-nav button:hover {
-    background-color: #ff9100;
-    color: #fff;
-}
-
-#btnLogout {
-    border-color: #cc3333;
-    color: #cc3333;
-}
-
-#btnLogout:hover {
-    background-color: #cc3333;
-    color: #fff;
-}
-/* КОНЕЦ: Стили для шапки */
-
 .container {
     max-width: 1000px;
     margin: 40px auto;
     padding: 0 20px;
 }
-
-/* Стилизация страниц-блоков */
-.page {
-    box-sizing: border-box;
-}
-
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 20px;
 }
-
-/* НАЧАЛО: Красивое отображение картинок в карточках */
-.grid > img {
-    display: none; /* Скрываем картинки, которые ломали сетку вне карточек */
-}
-
 .card {
     background: white;
-    padding: 0 0 30px 0; /* Убрали верхний паддинг для картинки */
+    padding: 30px 20px;
     border-radius: 12px;
     text-align: center;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     transition: transform 0.2s;
-    overflow: hidden; /* Чтобы картинка не вылезала за округлые углы */
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
 }
-
-/* Если вы захотите перенести теги <img> внутрь <div class="card">, они станут идеальными: */
-.card img {
-    width: 100%;
-    height: 180px;
-    object-fit: cover;
-}
-
-.card h2, .card p, .card button {
-    padding: 0 20px;
-    margin-top: 15px;
-}
-/* КОНЕЦ: Стили для картинок */
-
 .card:hover {
     transform: translateY(-5px);
 }
-
 .price {
     font-size: 1.8rem;
     font-weight: bold;
     color: #2c3e50;
     margin: 20px 0;
 }
-
 button, .submit-btn {
     background-color: #ff9100;
     color: white;
@@ -123,49 +52,10 @@ button, .submit-btn {
     cursor: pointer;
     width: 100%;
     font-weight: bold;
-    box-sizing: border-box;
-    transition: background-color 0.2s;
 }
-
 button:hover, .submit-btn:hover {
     background-color: #e68200;
 }
-
-/* НАЧАЛО: Красивое оформление окошек Входа и Регистрации */
-#loginPage, #registerPage {
-    background: white;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    border: 1px solid #e0e0e0;
-}
-
-#loginPage input, #registerPage input {
-    width: 100%;
-    padding: 12px;
-    box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 1rem;
-    margin-bottom: 15px !important; /* Перекрываем встроенные стили */
-}
-
-#loginPage button, #registerPage button {
-    margin-top: 5px;
-}
-
-#loginPage button[onclick*="homePage"], 
-#registerPage button[onclick*="homePage"] {
-    background-color: #7f8c8d;
-    margin-top: 15px;
-}
-
-#loginPage button[onclick*="homePage"]:hover, 
-#registerPage button[onclick*="homePage"]:hover {
-    background-color: #95a5a6;
-}
-/* КОНЕЦ: Стили для окон авторизации */
-
 .form-container {
     max-width: 500px;
     background: white;
@@ -173,14 +63,12 @@ button:hover, .submit-btn:hover {
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
-
 .back-link {
     color: #ff9100;
     text-decoration: none;
     display: inline-block;
     margin-bottom: 20px;
 }
-
 .summary-box {
     background-color: #fff5e6;
     padding: 15px;
@@ -188,17 +76,14 @@ button:hover, .submit-btn:hover {
     margin-bottom: 25px;
     border-left: 5px solid #ff9100;
 }
-
 .form-group {
     margin-bottom: 20px;
 }
-
 .form-group label {
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
 }
-
 .form-group input {
     width: 100%;
     padding: 12px;
