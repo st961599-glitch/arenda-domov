@@ -8,11 +8,6 @@ const firebaseConfig = {
   measurementId: "G-6GZ904F8D1"
 };
   
-// Initialize Firebase
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-
 // Регистрация
 function register() {
     const emailInput = document.getElementById('registerEmail');
