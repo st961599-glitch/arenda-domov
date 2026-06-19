@@ -8,17 +8,25 @@
 </head>
 <body>
 
+    <!-- НАЧАЛО: Добавили панель пользователя в шапку -->
     <header>
+        <div class="auth-nav">
+            <span id="userEmail" style="display: none; margin-right: 15px; font-weight: bold;"></span>
+            <button id="btnShowLogin" onclick="showLogin()">Войти</button>
+            <button id="btnShowRegister" onclick="showRegister()">Регистрация</button>
+            <button id="btnLogout" onclick="handleLogout()" style="display: none;">Выйти</button>
+        </div>
+
         <h1>Arenda domov</h1>
         <p>Выберите подходящий тариф для аренды дома</p>
-
     </header>
+    <!-- КОНЕЦ: Панель пользователя -->
 
-    <main class="container">
+    <!-- ГЛАВНАЯ СТРАНИЦА С ТАРИФАМИ -->
+    <main id="homePage" class="container page">
         <div class="grid">
-            
             <!-- Карточка 1 -->
-             <img src="https://avatars.mds.yandex.net/i?id=147be2c4ccaba402de5b880b399c3adce5fc6b2a-4396222-images-thumbs&n=13" alt>
+            <img src="https://avatars.mds.yandex.net/i?id=147be2c4ccaba402de5b880b399c3adce5fc6b2a-4396222-images-thumbs&n=13" alt>
             <div class="card">
                 <h2>На 1 месяц</h2>
                 <p class="price">67 000 ₽</p>
@@ -26,7 +34,7 @@
             </div>
 
             <!-- Карточка 2 -->
-          <img src="https://avatars.mds.yandex.net/i?id=e8ab80f1159129416e6564800e16dd247d6efa12-16330514-images-thumbs&n=13" alt>  
+            <img src="https://avatars.mds.yandex.net/i?id=e8ab80f1159129416e6564800e16dd247d6efa12-16330514-images-thumbs&n=13" alt>  
             <div class="card">
                 <h2>На 3 месяца</h2>
                 <p class="price">150 000 ₽</p>
@@ -42,23 +50,53 @@
             </div>
 
             <!-- Карточка 4 -->
-             <img src="https://avatars.mds.yandex.net/i?id=de5cae37fd9936830ff7e0bf2b7c0046a1bde8a3-5664508-images-thumbs&n=13" alt>
+            <img src="https://avatars.mds.yandex.net/i?id=de5cae37fd9936830ff7e0bf2b7c0046a1bde8a3-5664508-images-thumbs&n=13" alt>
             <div class="card">
                 <h2>На 1 год</h2>
                 <p class="price">540 000 ₽</p>
                 <button onclick="chooseTariff('1год', '540000')">Выбрать</button>
             </div>
-
         </div>
     </main>
 
+    <!-- НАЧАЛО: Новая страница ВХОДА -->
+    <div id="loginPage" class="container page" style="display: none; max-width: 400px; margin-top: 30px;">
+        <h2>Вход в аккаунт</h2>
+        <form onsubmit="event.preventDefault(); handleLogin(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value);">
+            <input type="email" id="loginEmail" placeholder="Ваш Email" required style="width:100%; margin-bottom:10px; padding:8px;"><br>
+            <input type="password" id="loginPassword" placeholder="Пароль" required style="width:100%; margin-bottom:10px; padding:8px;"><br>
+            <button type="submit" style="width: 100%; padding: 10px; margin-bottom: 10px;">Войти</button>
+        </form>
+        <p>Нет аккаунта? <a href="#" onclick="showRegister()">Зарегистрироваться</a></p>
+        <button onclick="document.querySelectorAll('.page').forEach(p => p.style.display='none'); document.getElementById('homePage').style.display='block';">Назад к тарифам</button>
+    </div>
+    <!-- КОНЕЦ: Страница ВХОДА -->
+
+    <!-- НАЧАЛО: Новая страница РЕГИСТРАЦИИ -->
+    <div id="registerPage" class="container page" style="display: none; max-width: 400px; margin-top: 30px;">
+        <h2>Регистрация</h2>
+        <form onsubmit="event.preventDefault(); handleRegister(document.getElementById('regEmail').value, document.getElementById('regPassword').value);">
+            <input type="email" id="regEmail" placeholder="Придумайте Email" required style="width:100%; margin-bottom:10px; padding:8px;"><br>
+            <input type="password" id="regPassword" placeholder="Придумайте пароль (от 6 знаков)" required style="width:100%; margin-bottom:10px; padding:8px;"><br>
+            <button type="submit" style="width: 100%; padding: 10px; margin-bottom: 10px;">Создать аккаунт</button>
+        </form>
+        <p>Уже есть аккаунт? <a href="#" onclick="showLogin()">Войти</a></p>
+        <button onclick="document.querySelectorAll('.page').forEach(p => p.style.display='none'); document.getElementById('homePage').style.display='block';">Назад к тарифам</button>
+    </div>
+    <!-- КОНЕЦ: Страница РЕГИСТРАЦИИ -->
+
+
     <script>
+        // Старый скрипт для выбора тарифа
         window.chooseTariff = function(id, price) {
             localStorage.setItem('selectedTariffId', id);
             localStorage.setItem('selectedTariffPrice', price);
             window.location.href = 'order.html';
         }
     </script>
-    <script src="firebase-app.js"></script>
+
+    <!-- ВАЖНО: Подключаем app.js как Модуль (type="module") -->
+    <script type="module" src="app.js"></script>
 </body>
 </html>
+
