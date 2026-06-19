@@ -9,17 +9,19 @@
 <body>
 
     <!-- НАЧАЛО: Добавили панель пользователя в шапку -->
-    <header>
-        <div class="auth-nav">
+        <header style="position: relative; z-index: 10;">
+        <!-- Переместили кнопки в начало и добавили z-index -->
+        <div class="auth-nav" style="position: absolute; top: 15px; right: 20px; z-index: 20;">
             <span id="userEmail" style="display: none; margin-right: 15px; font-weight: bold;"></span>
-            <button id="btnShowLogin" onclick="showLogin()">Войти</button>
-            <button id="btnShowRegister" onclick="showRegister()">Регистрация</button>
-            <button id="btnLogout" onclick="handleLogout()" style="display: none;">Выйти</button>
+            <button id="btnShowLogin" onclick="if(window.showLogin) window.showLogin(); else alert('Скрипт еще грузится...');">Войти</button>
+            <button id="btnShowRegister" onclick="if(window.showRegister) window.showRegister(); else alert('Скрипт еще грузится...');">Регистрация</button>
+            <button id="btnLogout" onclick="if(window.handleLogout) window.handleLogout();" style="display: none;">Выйти</button>
         </div>
 
         <h1>Arenda domov</h1>
         <p>Выберите подходящий тариф для аренды дома</p>
     </header>
+
     <!-- КОНЕЦ: Панель пользователя -->
 
     <!-- ГЛАВНАЯ СТРАНИЦА С ТАРИФАМИ -->
