@@ -7,7 +7,6 @@ const firebaseConfig = {
   appId: "1:297684238985:web:727fd972cdc8465a55fc58",
   measurementId: "G-6GZ904F8D1"
 };
-  
 // Регистрация
 function register() {
     const emailInput = document.getElementById('registerEmail');
