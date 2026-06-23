@@ -1,236 +1,201 @@
-// ОБЯЗАТЕЛЬНО: Вставьте сюда свои данные из Firebase Console!
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  orderBy,
+  query
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+/** ====== ВСТАВЬ СВОИ ДАННЫЕ FIREBASE ======
+ *  Firebase Console -> Project settings -> Your apps -> Firebase SDK snippet
+ *  ПОЛЕт “firebaseConfig” вставь целиком как объект.
+ */
 const firebaseConfig = {
-  apiKey: "AIzaSyDm3XvtldDnpLDH29uV8e0722nWj08vNqA",
-  authDomain: "arenda-domov-e2e15.firebaseapp.com",
-  projectId: "arenda-domov-e2e15",
-  storageBucket: "arenda-domov-e2e15.firebasestorage.app",
-  messagingSenderId: "297684238985",
-  appId: "1:297684238985:web:727fd972cdc8465a55fc58",
-  measurementId: "G-6GZ904F8D1"
+  apiKey: "ВАШ_API_KEY",
+  authDomain: "ВАШ_AUTH_DOMAIN",
+  projectId: "ВАШ_PROJECT_ID",
+  storageBucket: "ВАШ_STORAGE_BUCKET",
+  messagingSenderId: "ВАШ_MESSAGING_SENDER_ID",
+  appId: "ВАШ_APP_ID"
 };
 
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-// Инициализация Firebase
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const database = firebase.database();
+// UI
+const authSection = document.getElementById("authSection");
+const authTitle = document.getElementById("authTitle");
+const authForm = document.getElementById("authForm");
+const authSubmit = document.getElementById("authSubmit");
+const authMsg = document.getElementById("authMsg");
+const emailEl = document.getElementById("email");
+const passwordEl = document.getElementById("password");
 
-// DOM Элементы
-const authSection = document.getElementById('auth-section');
-const mainContent = document.getElementById('main-content');
-const emailInput = document.getElementById('auth-email');
-const passwordInput = document.getElementById('auth-password');
-const loginBtn = document.getElementById('login-btn');
-const registerBtn = document.getElementById('register-btn');
-const logoutBtn = document.getElementById('logout-btn');
-const userInfo = document.getElementById('user-info');
+const showLoginBtn = document.getElementById("showLogin");
+const showRegisterBtn = document.getElementById("showRegister");
+const logoutBtn = document.getElementById("logoutBtn");
 
-const houseTitleInput = document.getElementById('house-title');
-const housePriceInput = document.getElementById('house-price');
-const addListingBtn = document.getElementById('add-listing-btn');
-const listingsContainer = document.getElementById('listings-container');
+const authGuest = document.getElementById("auth-guest");
+const authUser = document.getElementById("auth-user");
+const userEmailEl = document.getElementById("userEmail");
 
-const cartList = document.getElementById('cart-list');
-const cartTotalSum = document.getElementById('cart-total-sum');
+const listingForm = document.getElementById("listingForm");
+const listingMsg = document.getElementById("listingMsg");
 
-// Глобальное состояние приложения
+const listingsEl = document.getElementById("listings");
+const refreshBtn = document.getElementById("refreshBtn");
+const countText = document.getElementById("countText");
+
+const cartItemsEl = document.getElementById("cartItems");
+const cartTotalEl = document.getElementById("cartTotal");
+const clearCartBtn = document.getElementById("clearCartBtn");
+const checkoutBtn = document.getElementById("checkoutBtn");
+const cartMsg = document.getElementById("cartMsg");
+
 let currentUser = null;
-let cart = [];
+let authMode = "login"; // "login" | "register"
 
-/* ==========================================
-   1. ЛОГИКА АВТОРИЗАЦИИ (ВХОД / РЕГИСТРАЦИЯ)
-   ========================================== */
-
-// Кнопка: Регистрация
-registerBtn.addEventListener('click', () => {
-    const email = emailInput.value;
-    const password = passwordInput.value;
-    
-    if(!email || !password) return alert('Заполните email и пароль!');
-
-    auth.createUserWithEmailAndPassword(email, password)
-        .then(() => {
-            alert('Регистрация успешна! Вы вошли на сайт.');
-            emailInput.value = '';
-            passwordInput.value = '';
-        })
-        .catch((error) => {
-            alert('Ошибка регистрации: ' + error.message);
-        });
-});
-
-// Кнопка: Войти
-loginBtn.addEventListener('click', () => {
-    const email = emailInput.value;
-    const password = passwordInput.value;
-
-    if(!email || !password) return alert('Заполните email и пароль!');
-
-    auth.signInWithEmailAndPassword(email, password)
-        .then(() => {
-            alert('Вы успешно вошли на сайт!');
-            emailInput.value = '';
-            passwordInput.value = '';
-        })
-        .catch((error) => {
-            alert('Ошибка входа: ' + error.message);
-        });
-});
-
-// Кнопка: Выйти
-logoutBtn.addEventListener('click', () => {
-    auth.signOut();
-});
-
-// Настоящее отслеживание сессии пользователя в реальном времени
-auth.onAuthStateChanged((user) => {
-    if (user) {
-        // Пользователь ВОШЕЛ
-        currentUser = user;
-        userInfo.textContent = "Вы вошли как: " + user.email;
-        
-        authSection.classList.add('hidden');    // Прячем форму входа
-        mainContent.classList.remove('hidden'); // Показываем внутренности сайта
-        logoutBtn.classList.remove('hidden');   // Показываем кнопку Выйти
-        
-        loadListingsFromFirebase();             // Запускаем синхронизацию каталога с БД
-    } else {
-        // Пользователь ВЫШЕЛ
-        currentUser = null;
-        userInfo.textContent = "Гость";
-        
-        authSection.classList.remove('hidden'); // Показываем форму входа
-        mainContent.classList.add('hidden');    // Прячем сайт
-        logoutBtn.classList.add('hidden');      // Прячем кнопку Выйти
-        
-        listingsContainer.innerHTML = '';
-        cart = [];
-        updateCartUI();
-    }
-});
-
-
-/* ==========================================
-   2. ДОБАВЛЕНИЕ ОБЪЯВЛЕНИЙ В FIREBASE DATABASE
-   ========================================== */
-
-addListingBtn.addEventListener('click', () => {
-    const title = houseTitleInput.value;
-    const price = Number(housePriceInput.value);
-
-    if (!title || !price) {
-        return alert('Заполните название дома и цену!');
-    }
-
-    // Создаем запись в ветке 'listings' базы данных
-    const listingsRef = database.ref('listings');
-    const newHouseRef = listingsRef.push(); // Генерирует уникальный ID объявления
-    
-    newHouseRef.set({
-        title: title,
-        price: price,
-        userId: currentUser.uid
-    })
-    .then(() => {
-        alert('Объявление добавлено в базу данных!');
-        houseTitleInput.value = '';
-        housePriceInput.value = '';
-    })
-    .catch((error) => {
-        alert('Ошибка записи в БД: ' + error.message);
-    });
-});
-
-
-/* ==========================================
-   3. ВЫВОД КАТАЛОГА В РЕАЛЬНОМ ВРЕМЕНИ
-   ========================================== */
-
-function loadListingsFromFirebase() {
-    const listingsRef = database.ref('listings');
-    
-    // on('value') автоматически обновляет экран, если кто-то добавил новый дом
-    listingsRef.on('value', (snapshot) => {
-        listingsContainer.innerHTML = '';
-        const data = snapshot.val();
-        
-        if (!data) {
-            listingsContainer.innerHTML = '<p>Объявлений пока нет.</p>';
-            return;
-        }
-
-        // Проходим циклом по всем объявлениям в базе
-        Object.keys(data).forEach((id) => {
-            const house = data[id];
-            
-            // Создаем HTML карточки
-            const card = document.createElement('div');
-            card.className = 'house-card';
-            card.innerHTML = `
-                <div>
-                    <h3>${house.title}</h3>
-                    <div class="price">${house.price} руб./сут.</div>
-                </div>
-                <button class="btn btn-primary buy-btn" data-title="${house.title}" data-price="${house.price}">
-                    Добавить в корзину
-                </button>
-            `;
-
-            // Вешаем событие клика на кнопку «Добавить в корзину»
-            card.querySelector('.buy-btn').addEventListener('click', (e) => {
-                const title = e.target.getAttribute('data-title');
-                const price = Number(e.target.getAttribute('data-price'));
-                addToCart(title, price);
-            });
-
-            listingsContainer.appendChild(card);
-        });
-    });
+// Cart helpers (store per-user)
+function cartKey(uid) {
+  return `cart:${uid}`;
+}
+function loadCart(uid) {
+  try {
+    return JSON.parse(localStorage.getItem(cartKey(uid))) || [];
+  } catch {
+    return [];
+  }
+}
+function saveCart(uid, cart) {
+  localStorage.setItem(cartKey(uid), JSON.stringify(cart));
+}
+function formatRUB(n) {
+  return new Intl.NumberFormat("ru-RU").format(Number(n || 0)) + " ₽";
 }
 
+function renderCart() {
+  cartMsg.textContent = "";
+  if (!currentUser) {
+    cartItemsEl.innerHTML = `<div class="muted">Войдите, чтобы использовать корзину.</div>`;
+    cartTotalEl.textContent = "0 ₽";
+    return;
+  }
 
-/* ==========================================
-   4. РАБОТА НАСТОЯЩЕЙ КОРЗИНЫ
-   ========================================== */
+  const cart = loadCart(currentUser.uid);
 
-function addToCart(title, price) {
-    // Добавляем объект в массив корзины
-    cart.push({
-        cartId: Date.now(), // Уникальный ID для удаления
-        title: title,
-        price: price
+  if (cart.length === 0) {
+    cartItemsEl.innerHTML = `<div class="muted">Корзина пуста. Добавьте объявление.</div>`;
+    cartTotalEl.textContent = "0 ₽";
+    return;
+  }
+
+  cartItemsEl.innerHTML = cart.map(item => {
+    return `
+      <div class="cart-item">
+        <div class="left">
+          <div class="name">${escapeHtml(item.title)}</div>
+          <div class="meta">${formatRUB(item.price)} × ${item.qty} = ${formatRUB(item.price * item.qty)}</div>
+        </div>
+        <div class="right">
+          <button class="smallBtn" data-action="minus" data-id="${item.id}">−</button>
+          <button class="smallBtn" data-action="plus" data-id="${item.id}">+</button>
+          <button class="smallBtn" data-action="remove" data-id="${item.id}">Удалить</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  const total = cart.reduce((sum, it) => sum + it.price * it.qty, 0);
+  cartTotalEl.textContent = formatRUB(total);
+
+  cartItemsEl.querySelectorAll("button").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const id = e.currentTarget.getAttribute("data-id");
+      const action = e.currentTarget.getAttribute("data-action");
+      updateCartItem(id, action);
     });
-    updateCartUI();
+  });
 }
 
-function removeFromCart(cartId) {
-    // Удаляем конкретный элемент по его ID
-    cart = cart.filter(item => item.cartId !== cartId);
-    updateCartUI();
+function updateCartItem(id, action) {
+  if (!currentUser) return;
+
+  const cart = loadCart(currentUser.uid);
+  const idx = cart.findIndex(x => x.id === id);
+  if (idx === -1) return;
+
+  if (action === "plus") cart[idx].qty += 1;
+  if (action === "minus") cart[idx].qty -= 1;
+  if (action === "remove") cart.splice(idx, 1);
+
+  if (action === "minus" && cart[idx] && cart[idx].qty <= 0) {
+    cart.splice(idx, 1);
+  }
+
+  saveCart(currentUser.uid, cart);
+  renderCart();
 }
 
-function updateCartUI() {
-    cartList.innerHTML = '';
-    let total = 0;
+function addToCart(listing) {
+  if (!currentUser) {
+    cartMsg.textContent = "Войдите, чтобы добавить в корзину.";
+    return;
+  }
+  cartMsg.textContent = "";
 
-    cart.forEach((item) => {
-        total += item.price;
+  const cart = loadCart(currentUser.uid);
+  const idx = cart.findIndex(x => x.id === listing.id);
 
-        const li = document.createElement('li');
-        li.innerHTML = `
-            <span>${item.title} (${item.price} руб.)</span>
-            <button class="btn btn-danger delete-btn" data-cart-id="${item.cartId}">Удалить</button>
-        `;
+  if (idx === -1) {
+    cart.push({ id: listing.id, title: listing.title, price: listing.price, qty: 1 });
+  } else {
+    cart[idx].qty += 1;
+  }
 
-        // Слушатель для кнопки удаления из корзины
-        li.querySelector('.delete-btn').addEventListener('click', (e) => {
-            const idToRemove = Number(e.target.getAttribute('data-cart-id'));
-            removeFromCart(idToRemove);
-        });
-
-        cartList.appendChild(li);
-    });
-
-    // Обновляем итоговую сумму
-    cartTotalSum.textContent = total;
+  saveCart(currentUser.uid, cart);
+  renderCart();
 }
+
+// Escape for HTML injection safety
+function escapeHtml(str) {
+  return String(str ?? "")
+    .replaceAll("&", "&")
+    .replaceAll("<", "<")
+    .replaceAll(">", ">")
+    .replaceAll('"', """)
+    .replaceAll("'", "'");
+}
+
+// Listings
+async function loadListings() {
+  listingsEl.innerHTML = `<div class="muted">Загрузка...</div>`;
+  const q = query(collection(db, "listings"), orderBy("createdAt", "desc"));
+  const snap = await getDocs(q);
+
+  const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+  if (items.length === 0) {
+    listingsEl.innerHTML = `<div class="muted">Пока нет объявлений. Добавьте первое!</div>`;
+  } else {
+    listingsEl.innerHTML = items.map(it => {
+      return `
+        <div class="listing">
+          <div class="listing-main">
+            <div class="listing-title">${escapeHtml(it.title)}</div>
+            <div class="listing-desc">${escapeHtml(it.description || "")}</div>
+            <span class="badge-price">${formatRUB(it.price)}/мес</span>
+          </div>
+          <div class="listing-actions">
+            <button data
+to be continued...
+
