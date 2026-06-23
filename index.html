@@ -3,62 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Аренда Домов - Тарифы</title>
+    <title>Аренда Домов</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <header>
-        <h1>Arenda domov</h1>
-        <p>Выберите подходящий тариф для аренды дома</p>
-
+        <h1>ДомикВНаем</h1>
+        <div id="auth-status">
+            <span id="user-info"></span>
+            <button id="logout-btn" class="hidden">Выйти</button>
+        </div>
     </header>
 
     <main class="container">
-        <div class="grid">
-            
-            <!-- Карточка 1 -->
-             <img src="https://avatars.mds.yandex.net/i?id=147be2c4ccaba402de5b880b399c3adce5fc6b2a-4396222-images-thumbs&n=13" alt>
-            <div class="card">
-                <h2>На 1 месяц</h2>
-                <p class="price">67 000 ₽</p>
-                <button onclick="chooseTariff('1месяц', '60000')">Выбрать</button>
-            </div>
+        <!-- Блок авторизации -->
+        <section id="auth-section" class="card">
+            <h2>Вход / Регистрация</h2>
+            <form id="auth-form">
+                <input type="email" id="auth-email" placeholder="Email" required>
+                <input type="password" id="auth-password" placeholder="Пароль" required>
+                <div class="auth-buttons">
+                    <button type="button" id="login-btn">Войти</button>
+                    <button type="button" id="register-btn">Регистрация</button>
+                </div>
+            </form>
+        </section>
 
-            <!-- Карточка 2 -->
-          <img src="https://avatars.mds.yandex.net/i?id=e8ab80f1159129416e6564800e16dd247d6efa12-16330514-images-thumbs&n=13" alt>  
-            <div class="card">
-                <h2>На 3 месяца</h2>
-                <p class="price">150 000 ₽</p>
-                <button onclick="chooseTariff('3месяца', '150000')">Выбрать</button>
-            </div>
+        <!-- Основной контент (доступен после входа) -->
+        <div id="main-content" class="hidden">
+            <!-- Форма добавления объявления -->
+            <section id="add-listing-section" class="card">
+                <h2>Добавить объявление аренды</h2>
+                <form id="listing-form">
+                    <input type="text" id="house-title" placeholder="Название дома (например, Вилла у озера)" required>
+                    <input type="number" id="house-price" placeholder="Цена за сутки (руб.)" required>
+                    <button type="submit">Опубликовать</button>
+                </form>
+            </section>
 
-            <!-- Карточка 3 -->
-            <img src="https://avatars.mds.yandex.net/i?id=2488e99372109c668df6709e27abcb464c8d6b2b-4571642-images-thumbs&n=13" alt>
-            <div class="card">
-                <h2>На 6 месяцев</h2>
-                <p class="price">280 000 ₽</p>
-                <button onclick="chooseTariff('6месяцев', '280000')">Выбрать</button>
-            </div>
+            <!-- Списки объявлений и корзина -->
+            <div class="shop-floor">
+                <section class="listings-container">
+                    <h2>Доступные дома</h2>
+                    <div id="listings-grid" class="grid"></div>
+                </section>
 
-            <!-- Карточка 4 -->
-             <img src="https://avatars.mds.yandex.net/i?id=de5cae37fd9936830ff7e0bf2b7c0046a1bde8a3-5664508-images-thumbs&n=13" alt>
-            <div class="card">
-                <h2>На 1 год</h2>
-                <p class="price">540 000 ₽</p>
-                <button onclick="chooseTariff('1год', '540000')">Выбрать</button>
+                <section id="cart-section" class="card">
+                    <h2>Ваша корзина</h2>
+                    <ul id="cart-list"></ul>
+                    <div class="cart-total">Итого: <span id="cart-sum">0</span> руб.</div>
+                </section>
             </div>
-
         </div>
     </main>
 
-    <script>
-        window.chooseTariff = function(id, price) {
-            localStorage.setItem('selectedTariffId', id);
-            localStorage.setItem('selectedTariffPrice', price);
-            window.location.href = 'order.html';
-        }
-    </script>
-    <script src="firebase-app.js"></script>
+    <!-- Подключение Firebase SDK (Модульный подход v10+) -->
+    <script type="module" src="app.js"></script>
 </body>
 </html>
