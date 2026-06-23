@@ -3,105 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ДомикВНаем — Аренда домов</title>
+    <title>Аренда Домов</title>
     <link rel="stylesheet" href="style.css">
+    
+    <!-- Железобетонное подключение Firebase (классический CDN, который не ломается) -->
+    <script src="https://gstatic.com"></script>
+    <script src="https://gstatic.com"></script>
+    <script src="https://gstatic.com"></script>
 </head>
 <body>
 
     <!-- Шапка сайта -->
-    <header class="navbar">
-        <div class="logo">🏡 ДомикВНаем</div>
-        <nav class="nav-controls">
-            <span id="user-display" class="user-email"></span>
-            <button id="nav-cart-btn" class="btn btn-secondary hidden">🛒 Корзина (<span id="cart-count">0</span>)</button>
-            <button id="logout-btn" class="btn btn-danger hidden">Выйти</button>
-        </nav>
+    <header>
+        <div class="logo">🏡 АрендаДомов</div>
+        <div class="auth-status">
+            <span id="user-info">Гость</span>
+            <button id="logout-btn" class="hidden">Выйти из аккаунта</button>
+        </div>
     </header>
 
-    <!-- Уведомления (Toast) -->
-    <div id="toast" class="toast hidden"></div>
-
-    <main class="main-container">
+    <div class="container">
         
-        <!-- ЭКРАН 1: Авторизация (Вход и Регистрация) -->
-        <section id="auth-screen" class="auth-box">
-            <div class="auth-tabs">
-                <button id="tab-login" class="tab-btn active">Вход</button>
-                <button id="tab-register" class="tab-btn">Регистрация</button>
+        <!-- БЛОК АВТОРИЗАЦИИ (РЕАЛЬНО РАБОТАЕТ) -->
+        <section id="auth-section" class="card">
+            <h2>Вход или Регистрация</h2>
+            <p class="hint">Введите email и пароль, затем нажмите нужную кнопку</p>
+            <div class="form-group">
+                <input type="email" id="auth-email" placeholder="Ваш Email (например: test@mail.ru)">
+                <input type="password" id="auth-password" placeholder="Пароль (минимум 6 символов)">
             </div>
-
-            <!-- Форма Входа -->
-            <form id="login-form" class="auth-form">
-                <h2>Рады вернуть вас!</h2>
-                <div class="input-group">
-                    <label>Email</label>
-                    <input type="email" id="login-email" required placeholder="example@mail.com">
-                </div>
-                <div class="input-group">
-                    <label>Пароль</label>
-                    <input type="password" id="login-password" required placeholder="••••••••">
-                </div>
-                <button type="submit" class="btn btn-primary">Войти в аккаунт</button>
-            </form>
-
-            <!-- Форма Регистрации -->
-            <form id="register-form" class="auth-form hidden">
-                <h2>Создать аккаунт</h2>
-                <div class="input-group">
-                    <label>Email</label>
-                    <input type="email" id="register-email" required placeholder="example@mail.com">
-                </div>
-                <div class="input-group">
-                    <label>Пароль</label>
-                    <input type="password" id="register-password" required placeholder="Минимум 6 символов">
-                </div>
-                <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
-            </form>
+            <div class="auth-buttons">
+                <button id="login-btn" class="btn btn-primary">Войти</button>
+                <button id="register-btn" class="btn btn-secondary">Зарегистрироваться</button>
+            </div>
         </section>
 
-        <!-- ЭКРАН 2: Главная рабочая зона сайта -->
-        <div id="app-screen" class="app-layout hidden">
+        <!-- ГЛАВНЫЙ ИНТЕРФЕЙС (ОТКРЫВАЕТСЯ ТОЛЬКО ПОСЛЕ ВХОДА) -->
+        <div id="main-content" class="hidden">
             
-            <!-- Левая колонка: Каталог и Форма -->
-            <div class="content-area">
-                
-                <!-- Блок добавления нового дома -->
-                <section class="panel">
-                    <h3>➕ Сдать дом в аренду</h3>
-                    <form id="listing-form" class="inline-form">
-                        <input type="text" id="house-title" placeholder="Название (например, Шале в лесу)" required>
-                        <input type="number" id="house-price" placeholder="Цена за сутки (₽)" required min="1">
-                        <button type="submit" class="btn btn-success">Опубликовать</button>
-                    </form>
-                </section>
+            <!-- ФОРМА ДОБАВЛЕНИЯ ОБЪЯВЛЕНИЯ -->
+            <section class="card">
+                <h2>➕ Создать объявление аренды</h2>
+                <div class="listing-form">
+                    <input type="text" id="house-title" placeholder="Название дома (например: Вилла у моря)">
+                    <input type="number" id="house-price" placeholder="Цена за сутки в рублях (например: 5000)">
+                    <button id="add-listing-btn" class="btn btn-success">Опубликовать на сайт</button>
+                </div>
+            </section>
 
-                <!-- Сетка объявлений -->
-                <section class="catalog-section">
-                    <h3>✨ Доступные предложения</h3>
-                    <div id="listings-grid" class="listings-grid">
-                        <!-- Сюда JS вставит реальные карточки -->
+            <!-- КАТАЛОГ И КОРЗИНА -->
+            <div class="site-grid">
+                
+                <!-- Живой список объявлений -->
+                <section class="catalog">
+                    <h2>📋 Доступные дома</h2>
+                    <div id="listings-container" class="listings-grid">
+                        <!-- Сюда добавляются объявления из базы данных -->
                     </div>
                 </section>
+
+                <!-- Настоящая корзина -->
+                <section class="card cart-section">
+                    <h2>🛒 Ваша корзина</h2>
+                    <ul id="cart-list">
+                        <!-- Сюда добавляются товары -->
+                    </ul>
+                    <div class="cart-total">
+                        <strong>Итого:</strong> <span id="cart-total-sum">0</span> руб.
+                    </div>
+                </section>
+
             </div>
 
-            <!-- Правая колонка: Корзина -->
-            <aside id="cart-panel" class="panel cart-panel">
-                <h3>🛍️ Ваша корзина</h3>
-                <div id="cart-empty" class="empty-message">Корзина пуста. Добавьте дома из каталога!</div>
-                <ul id="cart-list" class="cart-list"></ul>
-                <div id="cart-footer" class="cart-footer hidden">
-                    <div class="total-row">
-                        <span>Итого к оплате:</span>
-                        <span class="total-price"><span id="cart-sum">0</span> ₽</span>
-                    </div>
-                    <button id="checkout-btn" class="btn btn-primary btn-block">Забронировать все</button>
-                </div>
-            </aside>
-
         </div>
-    </main>
+    </div>
 
-    <!-- Подключаем Firebase -->
-    <script type="module" src="app.js"></script>
+    <!-- Подключаем логику -->
+    <script src="app.js"></script>
 </body>
 </html>
