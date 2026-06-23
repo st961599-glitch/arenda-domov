@@ -1,13 +1,14 @@
 // ОБЯЗАТЕЛЬНО: Вставьте сюда свои данные из Firebase Console!
 const firebaseConfig = {
-    apiKey: "ВАШ_API_KEY",
-    authDomain: "ВАШ_PROJECT_://firebaseapp.com",
-    databaseURL: "https://ВАШ_PROJECT_://firebaseio.com",
-    projectId: "ВАШ_PROJECT_ID",
-    storageBucket: "ВАШ_PROJECT_://appspot.com",
-    messagingSenderId: "ВАШ_ОТПРАВИТЕЛЬ",
-    appId: "ВАШ_APP_ID"
+  apiKey: "AIzaSyDm3XvtldDnpLDH29uV8e0722nWj08vNqA",
+  authDomain: "arenda-domov-e2e15.firebaseapp.com",
+  projectId: "arenda-domov-e2e15",
+  storageBucket: "arenda-domov-e2e15.firebasestorage.app",
+  messagingSenderId: "297684238985",
+  appId: "1:297684238985:web:727fd972cdc8465a55fc58",
+  measurementId: "G-6GZ904F8D1"
 };
+
 
 // Инициализация Firebase
 firebase.initializeApp(firebaseConfig);
