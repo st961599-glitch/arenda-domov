@@ -1,107 +1,77 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Аренда дома — объявления и корзина</title>
-  <link rel="stylesheet" href="./style.css" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ZENONIX STORE</title>
+
+<!-- Стиль -->
+<link rel="stylesheet" href="style.css" />
+
+<!-- Firebase SDK -->
+<script src="https://gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">🏠 Дом в аренду</div>
 
-    <div class="auth">
-      <div id="auth-guest" class="auth-block">
-        <button id="showLogin">Войти</button>
-        <button id="showRegister">Регистрация</button>
-      </div>
+<h1 style="text-align: center;">ZENONIX STORE</h1>
 
-      <div id="auth-user" class="auth-block" style="display:none;">
-        <span id="userEmail" class="email"></span>
-        <button id="logoutBtn">Выйти</button>
-      </div>
+<!-- Страницы -->
+<div id="loginPage" class="page auth-container">
+    <div class="form">
+        <h2>Войти</h2>
+        <input type="email" id="loginEmail" placeholder="Email" />
+        <input type="password" id="loginPassword" placeholder="Пароль" />
+        <button onclick="login()">Войти</button>
+        <p>или <a href="#" onclick="showRegister()">Регистрация</a></p>
     </div>
-  </header>
+</div>
 
-  <main class="container">
-    <!-- Auth forms -->
-    <section id="authSection" class="card" style="display:none;">
-      <h2 id="authTitle">Войти</h2>
+<div id="registerPage" class="page auth-container" style="display:none;">
+    <div class="form">
+        <h2>Регистрация</h2>
+        <input type="text" id="registerName" placeholder="Имя" />
+        <input type="email" id="registerEmail" placeholder="Email" />
+        <input type="password" id="registerPassword" placeholder="Пароль" />
+        <button onclick="register()">Зарегистрироваться</button>
+        <p>или <a href="#" onclick="showLogin()">Войти</a></p>
+    </div>
+</div>
 
-      <form id="authForm" class="form">
-        <label>
-          Email
-          <input id="email" type="email" autocomplete="username" required />
-        </label>
+<div id="catalogPage" class="page" style="display:none;">
+    <h2>Товары в наличии</h2>
+    <button onclick="logout()">Выйти</button>
+    <button onclick="toggleCartView()" style="background-color: #ff9f43; color: black; font-weight: bold;">Корзина (<span id="cartCount">0</span>)</button>
+    
+    <!-- Блок корзины -->
+    <div id="cartSection" style="display: none; border: 1px solid #9b59b6; padding: 15px; margin: 20px 0; background: rgba(155,160,67,0.1);">
+        <h3>Ваша корзина</h3>
+        <div id="cartItems"></div>
+        <p style="margin-top: 10px; font-weight: bold;">Итого: <span id="cartTotal">0</span> руб.</p>
+        <!-- Исправленная кнопка -->
+        <button id="checkoutBtn" onclick="openOrderModal()" style="background-color: #2ed573; color: white; padding: 5px 10px; cursor: pointer;">Оформить заказ</button>
+    </div>
 
-        <label>
-          Пароль
-          <input id="password" type="password" autocomplete="current-password" required />
-        </label>
+    <div id="products"></div>
+</div>
 
-        <button id="authSubmit" type="submit">Продолжить</button>
-        <p id="authMsg" class="msg"></p>
-      </form>
-    </section>
-
-    <!-- Create announcement -->
-    <section class="grid">
-      <section class="card">
-        <h2>Добавить объявление</h2>
-
-        <form id="listingForm" class="form">
-          <label>
-            Название объявления
-            <input id="title" type="text" maxlength="80" required placeholder="Например: Дом у моря" />
-          </label>
-
-          <label>
-            Цена (за месяц)
-            <input id="price" type="number" min="0" step="1" required placeholder="Например: 80000" />
-          </label>
-
-          <label>
-            Описание
-            <textarea id="description" rows="4" maxlength="500" placeholder="Короткое описание"></textarea>
-          </label>
-
-          <button type="submit">Опубликовать</button>
-          <p id="listingMsg" class="msg"></p>
-        </form>
-      </section>
-
-      <section class="card">
-        <h2>Объявления</h2>
-        <div class="toolbar">
-          <button id="refreshBtn" class="secondary">Обновить</button>
-          <div id="countText" class="muted"></div>
+<!-- Модальное окно оформления заказа -->
+<div id="orderModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 9999;">
+    <div style="background: #2c0e3e; padding: 30px; border: 2px solid #9b59b6; box-shadow: 0 0 25px rgba(155, 89, 182, 0.8); text-align: center;">
+        <h2>Оформление заказа</h2>
+        <p>Введите ваши реквизиты:</p>
+        <input type="text" id="orderName" placeholder="Ваше Имя" style="margin: 5px auto;" />
+        <input type="text" id="orderPhone" placeholder="Номер телефона" style="margin: 5px auto;" />
+        <input type="text" id="orderCard" placeholder="Номер карты" style="margin: 5px auto;" />
+        <div style="margin-top: 15px;">
+            <button onclick="submitOrder()" style="background-color: #2ed573; color: white;">Оплатить заказ</button>
+            <button onclick="closeOrderModal()">Отмена</button>
         </div>
+    </div>
+</div>
 
-        <div id="listings" class="listings"></div>
-      </section>
-    </section>
-
-    <!-- Cart -->
-    <section class="card">
-      <div class="cart-header">
-        <h2>🛒 Корзина</h2>
-        <div class="cart-actions">
-          <button id="clearCartBtn" class="secondary">Очистить</button>
-          <button id="checkoutBtn">Оформить</button>
-        </div>
-      </div>
-
-      <div id="cartItems" class="cart-items"></div>
-
-      <div class="cart-summary">
-        <div class="muted">Итого</div>
-        <div class="total" id="cartTotal">0 ₽</div>
-      </div>
-
-      <p id="cartMsg" class="msg"></p>
-    </section>
-  </main>
-
-  <script type="module" src="./app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
+
