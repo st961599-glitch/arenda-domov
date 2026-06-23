@@ -1,84 +1,107 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Аренда Домов</title>
-    <link rel="stylesheet" href="style.css">
-    
-    <!-- Железобетонное подключение Firebase (классический CDN, который не ломается) -->
-    <script src="https://gstatic.com"></script>
-    <script src="https://gstatic.com"></script>
-    <script src="https://gstatic.com"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Аренда дома — объявления и корзина</title>
+  <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
+  <header class="topbar">
+    <div class="brand">🏠 Дом в аренду</div>
 
-    <!-- Шапка сайта -->
-    <header>
-        <div class="logo">🏡 АрендаДомов</div>
-        <div class="auth-status">
-            <span id="user-info">Гость</span>
-            <button id="logout-btn" class="hidden">Выйти из аккаунта</button>
-        </div>
-    </header>
+    <div class="auth">
+      <div id="auth-guest" class="auth-block">
+        <button id="showLogin">Войти</button>
+        <button id="showRegister">Регистрация</button>
+      </div>
 
-    <div class="container">
-        
-        <!-- БЛОК АВТОРИЗАЦИИ (РЕАЛЬНО РАБОТАЕТ) -->
-        <section id="auth-section" class="card">
-            <h2>Вход или Регистрация</h2>
-            <p class="hint">Введите email и пароль, затем нажмите нужную кнопку</p>
-            <div class="form-group">
-                <input type="email" id="auth-email" placeholder="Ваш Email (например: test@mail.ru)">
-                <input type="password" id="auth-password" placeholder="Пароль (минимум 6 символов)">
-            </div>
-            <div class="auth-buttons">
-                <button id="login-btn" class="btn btn-primary">Войти</button>
-                <button id="register-btn" class="btn btn-secondary">Зарегистрироваться</button>
-            </div>
-        </section>
-
-        <!-- ГЛАВНЫЙ ИНТЕРФЕЙС (ОТКРЫВАЕТСЯ ТОЛЬКО ПОСЛЕ ВХОДА) -->
-        <div id="main-content" class="hidden">
-            
-            <!-- ФОРМА ДОБАВЛЕНИЯ ОБЪЯВЛЕНИЯ -->
-            <section class="card">
-                <h2>➕ Создать объявление аренды</h2>
-                <div class="listing-form">
-                    <input type="text" id="house-title" placeholder="Название дома (например: Вилла у моря)">
-                    <input type="number" id="house-price" placeholder="Цена за сутки в рублях (например: 5000)">
-                    <button id="add-listing-btn" class="btn btn-success">Опубликовать на сайт</button>
-                </div>
-            </section>
-
-            <!-- КАТАЛОГ И КОРЗИНА -->
-            <div class="site-grid">
-                
-                <!-- Живой список объявлений -->
-                <section class="catalog">
-                    <h2>📋 Доступные дома</h2>
-                    <div id="listings-container" class="listings-grid">
-                        <!-- Сюда добавляются объявления из базы данных -->
-                    </div>
-                </section>
-
-                <!-- Настоящая корзина -->
-                <section class="card cart-section">
-                    <h2>🛒 Ваша корзина</h2>
-                    <ul id="cart-list">
-                        <!-- Сюда добавляются товары -->
-                    </ul>
-                    <div class="cart-total">
-                        <strong>Итого:</strong> <span id="cart-total-sum">0</span> руб.
-                    </div>
-                </section>
-
-            </div>
-
-        </div>
+      <div id="auth-user" class="auth-block" style="display:none;">
+        <span id="userEmail" class="email"></span>
+        <button id="logoutBtn">Выйти</button>
+      </div>
     </div>
+  </header>
 
-    <!-- Подключаем логику -->
-    <script src="app.js"></script>
+  <main class="container">
+    <!-- Auth forms -->
+    <section id="authSection" class="card" style="display:none;">
+      <h2 id="authTitle">Войти</h2>
+
+      <form id="authForm" class="form">
+        <label>
+          Email
+          <input id="email" type="email" autocomplete="username" required />
+        </label>
+
+        <label>
+          Пароль
+          <input id="password" type="password" autocomplete="current-password" required />
+        </label>
+
+        <button id="authSubmit" type="submit">Продолжить</button>
+        <p id="authMsg" class="msg"></p>
+      </form>
+    </section>
+
+    <!-- Create announcement -->
+    <section class="grid">
+      <section class="card">
+        <h2>Добавить объявление</h2>
+
+        <form id="listingForm" class="form">
+          <label>
+            Название объявления
+            <input id="title" type="text" maxlength="80" required placeholder="Например: Дом у моря" />
+          </label>
+
+          <label>
+            Цена (за месяц)
+            <input id="price" type="number" min="0" step="1" required placeholder="Например: 80000" />
+          </label>
+
+          <label>
+            Описание
+            <textarea id="description" rows="4" maxlength="500" placeholder="Короткое описание"></textarea>
+          </label>
+
+          <button type="submit">Опубликовать</button>
+          <p id="listingMsg" class="msg"></p>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Объявления</h2>
+        <div class="toolbar">
+          <button id="refreshBtn" class="secondary">Обновить</button>
+          <div id="countText" class="muted"></div>
+        </div>
+
+        <div id="listings" class="listings"></div>
+      </section>
+    </section>
+
+    <!-- Cart -->
+    <section class="card">
+      <div class="cart-header">
+        <h2>🛒 Корзина</h2>
+        <div class="cart-actions">
+          <button id="clearCartBtn" class="secondary">Очистить</button>
+          <button id="checkoutBtn">Оформить</button>
+        </div>
+      </div>
+
+      <div id="cartItems" class="cart-items"></div>
+
+      <div class="cart-summary">
+        <div class="muted">Итого</div>
+        <div class="total" id="cartTotal">0 ₽</div>
+      </div>
+
+      <p id="cartMsg" class="msg"></p>
+    </section>
+  </main>
+
+  <script type="module" src="./app.js"></script>
 </body>
 </html>
