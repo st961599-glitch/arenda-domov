@@ -1,212 +1,120 @@
-:root {
-  --bg: #0b1220;
-  --panel: #111a2f;
-  --card: #121c35;
-  --text: #e7eefc;
-  --muted: #9bb0d3;
-  --accent: #5eead4;
-  --accent2: #60a5fa;
-  --danger: #fb7185;
-  --border: rgba(255,255,255,0.10);
-}
-
-* { box-sizing: border-box; }
 body {
-  margin: 0;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  background: radial-gradient(1200px 800px at 20% 0%, rgba(96,165,250,0.25), transparent),
-              radial-gradient(900px 600px at 80% 20%, rgba(94,234,212,0.18), transparent),
-              var(--bg);
-  color: var(--text);
+    font-family: Tahoma, sans-serif;
+    background-image: url('Фон.png');
+    background-position: center;
+    background-repeat: no-repeat; /* Заменил repeat на no-repeat, чтобы не дублировалась */
+    background-size: cover;      /* Добавил, чтобы картинка растянулась во весь экран */
+    background-attachment: fixed;
+    padding: 20px;
+    margin: 0;
 }
 
-.topbar{
-  display:flex;
-  justify-content: space-between;
-  align-items:center;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  background: rgba(11,18,32,0.7);
-  backdrop-filter: blur(10px);
-  z-index: 10;
+/* Изменен цвет названия магазина на белый */
+.shop-name, #shop-title, h1, h2 {
+    color: #ffffff !important; 
 }
 
-.brand{ font-weight: 800; letter-spacing: 0.2px; }
-
-.auth-block{ display:flex; gap: 10px; align-items:center; }
-.email{ color: var(--muted); }
-
-.container{
-  width: min(1100px, 95vw);
-  margin: 18px auto 60px;
-  display:flex;
-  flex-direction: column;
-  gap: 16px;
+.page {
+    margin-bottom: 20px;
 }
 
-.card{
-  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 16px;
+.auth-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin-top: 50px;
+    background: rgba(26, 8, 38, 0.85);
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 350px;
+    margin-left: auto;
+    margin-right: auto;
+    border: 1px solid rgba(155, 89, 182, 0.4);
+    box-shadow: 0 0 20px rgba(155, 89, 182, 0.3);
+    color: #ffffff; /* Сделал текст входа, регистрации и подписи белым */
 }
 
-.grid{
-  display:grid;
-  grid-template-columns: 1fr 1.3fr;
-  gap: 16px;
+#products {
+    display: flex;
+    flex-wrap: wrap;
 }
-@media (max-width: 900px){
-  .grid{ grid-template-columns: 1fr; }
-}
-
-h2{ margin: 0 0 12px; font-size: 18px; }
-
-.form{ display:flex; flex-direction: column; gap: 10px; }
-label{
-  display:flex;
-  flex-direction: column;
-  gap: 6px;
-  color: var(--muted);
-  font-size: 13px;
-}
-input, textarea{
-  background: rgba(0,0,0,0.22);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  color: var(--text);
-  padding: 10px 12px;
-  outline: none;
-}
-textarea{ resize: vertical; }
-
-button{
-  border: none;
-  border-radius: 12px;
-  padding: 10px 14px;
-  cursor:pointer;
-  background: linear-gradient(180deg, rgba(94,234,212,0.95), rgba(94,234,212,0.7));
-  color: #062316;
-  font-weight: 800;
-}
-button.secondary{
-  background: rgba(255,255,255,0.06);
-  color: var(--text);
-  border: 1px solid var(--border);
-}
-button:disabled{
-  opacity: 0.6;
-  cursor: not-allowed;
+.product-image-container {
+    position: relative;
+    margin-bottom: 10px;
 }
 
-.msg{
-  margin: 10px 0 0;
-  color: var(--accent2);
-  min-height: 18px;
-  font-size: 13px;
-}
-.msg.error{ color: var(--danger); }
-
-.toolbar{
-  display:flex;
-  justify-content: space-between;
-  align-items:center;
-  margin-bottom: 12px;
-}
-.muted{ color: var(--muted); font-size: 13px; }
-
-.listings{
-  display:flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.listing{
-  background: rgba(0,0,0,0.18);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px;
-  display:flex;
-  justify-content: space-between;
-  gap: 12px;
-}
-.listing-main{ flex: 1; }
-.listing-title{
-  font-weight: 900;
-  margin-bottom: 6px;
-}
-.listing-desc{
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.35;
-  margin-bottom: 8px;
-}
-.badge-price{
-  display:inline-block;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: rgba(96,165,250,0.15);
-  border: 1px solid rgba(96,165,250,0.35);
-  color: var(--accent2);
-  font-weight: 900;
-  font-size: 13px;
-}
-.listing-actions{
-  display:flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 8px;
-  min-width: 150px;
+.product-description {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(44, 14, 62, 0.95);
+    color: white;
+    padding: 10px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    height: auto;
 }
 
-.cart-header{
-  display:flex;
-  align-items:flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-.cart-actions{ display:flex; gap: 10px; }
-
-.cart-items{
-  display:flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 8px;
-}
-.cart-item{
-  display:flex;
-  justify-content: space-between;
-  align-items:center;
-  gap: 12px;
-  padding: 10px 12px;
-  background: rgba(0,0,0,0.18);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-}
-.cart-item .left{
-  display:flex; flex-direction: column; gap: 4px;
-}
-.cart-item .name{ font-weight: 900; }
-.cart-item .meta{ color: var(--muted); font-size: 13px; }
-.cart-item .right{
-  display:flex; align-items:center; gap: 8px;
-}
-.smallBtn{
-  padding: 8px 10px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid var(--border);
-  color: var(--text);
-  font-weight: 800;
+.product:hover .product-description {
+    opacity: 1;
 }
 
-.cart-summary{
-  margin-top: 14px;
-  display:flex;
-  justify-content: space-between;
-  align-items:center;
-  padding-top: 10px;
-  border-top: 1px solid var(--border);
+.product {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(155, 89, 182, 0.5);
+    background: rgba(26, 8, 38, 0.8);
+    padding: 10px;
+    margin: 10px;
+    width: 200px;
+    box-shadow: 0 0 15px rgba(155, 89, 182, 0.4);
+    transition: all 0.3s ease;
+    color: #ffffff; /* ИСПРАВЛЕНО: Сделал название игр и цену белыми внутри карточки */
 }
-.total{ font-size: 22px; font-weight: 1000; color: var(--accent); }
+
+.product img {
+    max-width: 100%;
+    height: auto;
+}
+button {
+    margin: 5px;
+    cursor: pointer;
+    border-radius: 4px;
+    border: 1px solid #9b59b6;
+    background-color: #8e44ad;
+    color: white;
+    padding: 5px 10px;
+    transition: background 0.2s;
+}
+button:hover {
+    background-color: #9b59b6;
+}
+input {
+    display: block;
+    margin: 5px auto;
+    padding: 5px;
+    width: 200px;
+    color: #ffffff;
+    border-radius: 4px;
+    border: 1px solid #9b59b6;
+    background-color: rgba(44, 14, 62, 0.8); /* ИСПРАВЛЕНО: Добавлен темный фон, чтобы белый текст было видно */
+}
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 400px;
+    margin-bottom: 5px;
+    border-bottom: 1px dashed rgba(255,255,255,0.3);
+    padding-bottom: 5px;
+    color: #ffffff; /* Сделал текст в корзине белым */
+}
+#cartSection {
+    border: 1px solid #9b59b6 !important;
+    background: rgba(155, 89, 182, 0.1) !important;
+    color: #ffffff; /* Сделал текст секции корзины белым */
+}
