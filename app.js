@@ -1,9 +1,8 @@
-// Импорт необходимых модулей SDK Firebase v10+
 import { initializeApp } from "https://gstatic.com";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://gstatic.com";
 import { getDatabase, ref, set, push, onValue } from "https://gstatic.com";
 
-// НАСТРОЙКА FIREBASE (Вставьте сюда свои ключи из консоли Firebase)
+// Ваша конфигурация Firebase
 const firebaseConfig = {
     apiKey: "ВАШ_API_KEY",
     authDomain: "ВАШ_PROJECT_://firebaseapp.com",
@@ -19,132 +18,169 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const database = getDatabase(app);
 
-// DOM Элементы
-const authSection = document.getElementById('auth-section');
-const mainContent = document.getElementById('main-content');
-const authForm = document.getElementById('auth-form');
-const emailInput = document.getElementById('auth-email');
-const passwordInput = document.getElementById('auth-password');
-const loginBtn = document.getElementById('login-btn');
-const registerBtn = document.getElementById('register-btn');
+// Элементы навигации и экранов
+const authScreen = document.getElementById('auth-screen');
+const appScreen = document.getElementById('app-screen');
+const userDisplay = document.getElementById('user-display');
 const logoutBtn = document.getElementById('logout-btn');
-const userInfo = document.getElementById('user-info');
+const navCartBtn = document.getElementById('nav-cart-btn');
+const cartCount = document.getElementById('cart-count');
 
+// Вкладки авторизации
+const tabLogin = document.getElementById('tab-login');
+const tabRegister = document.getElementById('tab-register');
+const loginForm = document.getElementById('login-form');
+const registerForm = document.getElementById('register-form');
+
+// Элементы контента
 const listingForm = document.getElementById('listing-form');
-const houseTitle = document.getElementById('house-title');
-const housePrice = document.getElementById('house-price');
 const listingsGrid = document.getElementById('listings-grid');
-
 const cartList = document.getElementById('cart-list');
+const cartEmpty = document.getElementById('cart-empty');
+const cartFooter = document.getElementById('cart-footer');
 const cartSum = document.getElementById('cart-sum');
+const checkoutBtn = document.getElementById('checkout-btn');
 
-// Состояние приложения
 let currentUser = null;
 let cart = [];
 
-// --- Авторизация ---
+/* --- 1. ПЕРЕКЛЮЧЕНИЕ ИНТЕРФЕЙСА (Вкладки Вход / Регистрация) --- */
+tabLogin.addEventListener('click', () => {
+    tabLogin.classList.add('active');
+    tabRegister.classList.remove('active');
+    loginForm.classList.remove('hidden');
+    registerForm.classList.add('hidden');
+});
+
+tabRegister.addEventListener('click', () => {
+    tabRegister.classList.add('active');
+    tabLogin.classList.remove('active');
+    registerForm.classList.remove('hidden');
+    loginForm.classList.add('hidden');
+});
+
+/* --- 2. ЛОГИКА АВТОРИЗАЦИИ (FIREBASE AUTH) --- */
 
 // Регистрация
-registerBtn.addEventListener('click', async () => {
-    const email = emailInput.value;
-    const password = passwordInput.value;
+registerForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('register-email').value;
+    const password = document.getElementById('register-password').value;
     try {
         await createUserWithEmailAndPassword(auth, email, password);
-        authForm.reset();
+        showToast("✅ Аккаунт успешно создан!");
+        registerForm.reset();
     } catch (error) {
-        alert("Ошибка регистрации: " + error.message);
+        showToast("❌ Ошибка регистрации: " + error.message);
     }
 });
 
 // Вход
-loginBtn.addEventListener('click', async () => {
-    const email = emailInput.value;
-    const password = passwordInput.value;
+loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
     try {
         await signInWithEmailAndPassword(auth, email, password);
-        authForm.reset();
+        showToast("👋 Рады видеть вас снова!");
+        loginForm.reset();
     } catch (error) {
-        alert("Ошибка входа: " + error.message);
+        showToast("❌ Неверный логин или пароль");
     }
 });
 
 // Выход
-logoutBtn.addEventListener('click', () => signOut(auth));
+logoutBtn.addEventListener('click', () => {
+    signOut(auth).then(() => showToast("ℹ️ Вы вышли из аккаунта"));
+});
 
-// Слушатель изменения состояния пользователя
+// Отслеживание сессии (Показывает нужный экран сайта)
 onAuthStateChanged(auth, (user) => {
     if (user) {
         currentUser = user;
-        userInfo.textContent = user.email;
-        authSection.classList.add('hidden');
-        mainContent.classList.remove('hidden');
+        userDisplay.textContent = user.email;
+        
+        // Показываем приложение, прячем авторизацию
+        authScreen.classList.add('hidden');
+        appScreen.classList.remove('hidden');
         logoutBtn.classList.remove('hidden');
-        loadListings(); // Загружаем объявления из БД
+        navCartBtn.classList.remove('hidden');
+        
+        listenToListings(); // Включаем живую базу данных
     } else {
         currentUser = null;
-        userInfo.textContent = '';
-        authSection.classList.remove('hidden');
-        mainContent.classList.add('hidden');
+        userDisplay.textContent = '';
+        
+        // Возвращаем экран авторизации
+        authScreen.classList.remove('hidden');
+        appScreen.classList.add('hidden');
         logoutBtn.classList.add('hidden');
+        navCartBtn.classList.add('hidden');
+        
         listingsGrid.innerHTML = '';
         cart = [];
         updateCartUI();
     }
 });
 
-// --- Работа с объявлениями (Firebase Realtime Database) ---
+/* --- 3. РАБОТА С ОБЪЯВЛЕНИЯМИ (FIREBASE REALTIME DATABASE) --- */
 
-// Создание объявления
+// Добавление дома
 listingForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!currentUser) return;
 
-    const title = houseTitle.value;
-    const price = Number(housePrice.value);
+    const title = document.getElementById('house-title').value;
+    const price = Number(document.getElementById('house-price').value);
 
     try {
         const listingsRef = ref(database, 'listings');
-        const newListingRef = push(listingsRef); // Создаем уникальный ID
-        await set(newListingRef, {
+        const newHouseRef = push(listingsRef);
+        await set(newHouseRef, {
             title: title,
             price: price,
-            createdBy: currentUser.uid
+            owner: currentUser.uid
         });
+        showToast("🎉 Объявление успешно опубликовано!");
         listingForm.reset();
     } catch (error) {
-        alert("Не удалось добавить объявление: " + error.message);
+        showToast("❌ Ошибка публикации: " + error.message);
     }
 });
 
-// Получение объявлений в реальном времени
-function loadListings() {
+// Получение данных и построение живого каталога
+function listenToListings() {
     const listingsRef = ref(database, 'listings');
     onValue(listingsRef, (snapshot) => {
         listingsGrid.innerHTML = '';
         const data = snapshot.val();
-        if (!data) return;
+        
+        if (!data) {
+            listingsGrid.innerHTML = '<div class="empty-message">Объявлений пока нет. Станьте первым!</div>';
+            return;
+        }
 
         Object.keys(data).forEach((id) => {
             const item = data[id];
-            createHouseCard(id, item.title, item.price);
+            renderHouseCard(id, item.title, item.price);
         });
     });
 }
 
-// Рендер карточки дома
-function createHouseCard(id, title, price) {
+// Отрисовка красивой карточки
+function renderHouseCard(id, title, price) {
     const card = document.createElement('div');
     card.className = 'house-card';
     card.innerHTML = `
         <div>
-            <h3>${escapeHtml(title)}</h3>
-            <p class="house-price">${price} руб./сутки</p>
+            <h4>${escapeHtml(title)}</h4>
+            <div class="house-price">${price.toLocaleString()} ₽ <small>/ сутки</small></div>
         </div>
-        <button class="add-to-cart-btn" data-id="${id}" data-title="${escapeHtml(title)}" data-price="${price}">
-            В корзину
+        <button class="btn btn-primary add-to-cart-btn" data-id="${id}" data-title="${escapeHtml(title)}" data-price="${price}">
+            Забронировать
         </button>
     `;
-    
+
     card.querySelector('.add-to-cart-btn').addEventListener('click', (e) => {
         const btn = e.target;
         addToCart(btn.dataset.id, btn.dataset.title, Number(btn.dataset.price));
@@ -153,33 +189,70 @@ function createHouseCard(id, title, price) {
     listingsGrid.appendChild(card);
 }
 
-// --- Корзина ---
+/* --- 4. РАБОТА С КОРЗИНОЙ --- */
 
 function addToCart(id, title, price) {
-    cart.push({ id, title, price });
+    cart.push({ cartItemId: Date.now(), id, title, price });
+    showToast(`🛒 ${title} добавлен в корзину`);
+    updateCartUI();
+}
+
+function removeFromCart(cartItemId) {
+    cart = cart.filter(item => item.cartItemId !== cartItemId);
     updateCartUI();
 }
 
 function updateCartUI() {
     cartList.innerHTML = '';
-    let total = 0;
+    
+    if (cart.length === 0) {
+        cartEmpty.classList.remove('hidden');
+        cartFooter.classList.add('hidden');
+        cartCount.textContent = '0';
+        return;
+    }
 
-    cart.forEach((item, index) => {
+    cartEmpty.classList.add('hidden');
+    cartFooter.classList.remove('hidden');
+    cartCount.textContent = cart.length;
+
+    let total = 0;
+    cart.forEach((item) => {
         total += item.price;
         const li = document.createElement('li');
         li.innerHTML = `
-            <span>${escapeHtml(item.title)}</span>
-            <span>${item.price} руб.</span>
+            <div>
+                <div><strong>${escapeHtml(item.title)}</strong></div>
+                <div style="font-size:0.85rem; color:var(--text-muted)">${item.price.toLocaleString()} ₽</div>
+            </div>
+            <button class="remove-cart-item" data-cart-id="${item.cartItemId}">✕</button>
         `;
+        
+        li.querySelector('.remove-cart-item').addEventListener('click', (e) => {
+            removeFromCart(Number(e.target.dataset.cartId));
+        });
+
         cartList.appendChild(li);
     });
 
-    cartSum.textContent = total;
+    cartSum.textContent = total.toLocaleString();
 }
 
-// Утилита для безопасности ввода
-function escapeHtml(string) {
-    return String(string).replace(/[&<>"']/g, function (s) {
-        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[s];
-    });
+checkoutBtn.addEventListener('click', () => {
+    showToast("🚀 Успешно! Ваша заявка на аренду отправлена владельцам.");
+    cart = [];
+    updateCartUI();
+});
+
+/* --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ --- */
+
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.remove('hidden');
+    setTimeout(() => toast.classList.add('hidden'), 3500);
+}
+
+function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
 }
